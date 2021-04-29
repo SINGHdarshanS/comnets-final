@@ -99,6 +99,7 @@ def receive_packet(h, sent_packet):
     s = socket(AF_INET, SOCK_DGRAM)
     s.bind((h.ip, h.port))
     seq_failed = -1
+    type, ttl, src, dest, dest2, dest3, kval, data = None
 
     #Waits to receive packet on h.ip/h.port
     while True:
@@ -112,25 +113,18 @@ def receive_packet(h, sent_packet):
             seq_failed = type
             break
 
-        if (type == 0):
-            pass
-        elif (type == 1 and dest == h.id):
-            # final destinatinon is reached by packet if only
-            print("Received: ", packet, " From: ", src)
+        if(type == 1 and dest == h.id):
+            print("Received: ", data, " From: ", src)
 
-            # Creates reply packet
-            packet = create_packet(2, h.id, src, 0, 'This is a reply!')
+            # Creates ack packet
+            packet = create_packet("ack", src=h.id, dest=src)
             send_packet(h, packet)
 
         # Checks for reply packet (Note this is not very flexable and would break the server if it receives reply packet)
-    elif(type == 2 and dest == h.id):
+        elif(type == 2 and dest == h.id):
             #data = read_data(packet)
             print("Receved: ", packet, " From: ", src)
             break
-        elif(type == 3):
-            pass
-        else:
-            pass
 
     s.close()
     return  seq_failed
