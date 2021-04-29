@@ -58,30 +58,30 @@ def read_packet(pkt, ttl=None, src=None, dest=None, dest2=None, dest3=None, kval
 ###################################
 
 #Starts a ping from current host (src) to desired destination (dst)
-# def ping(h, c, dst):
-#     seq_num, nor, rtt = 0, 0, []
-#     #count = 0
-#     for x in range(c):
-#         #count += 1
-#         # Creates and sends the request packet
-#         packet = create_packet(1, h.id, dst, seq=seq_num, data='This is NOT assignment 5!')
-#         send_packet(h, packet)
-#         send_time = time.time()
-#
-#         # Waits to receive a reply packet to move onto next ping
-#         seq_failed = receive_packet(h, packet)
-#         if seq_failed == -1:
-#             rtt.append(time.time()-send_time)
-#             seq_num += 1
-#         else:
-#             x -= 1
-#             nor += 1
-#             print("Retransmitting packet with seq num: ", seq_num)
-#     rtt = np.array(rtt)
-#     #print(count)
-#     print(c, " packets transmitted, ", nor, " packets retransmitted, ", (nor/c)*100, "% packet loss",
-#          "\n round-trip min/avg/max/stddev = ", np.min(rtt),"/",np.mean(rtt),"/",np.max(rtt),"/",np.std(rtt), " s" )
-#     return 0
+def ping(h, c, dst):
+    seq_num, nor, rtt = 0, 0, []
+    #count = 0
+    for x in range(c):
+        #count += 1
+        # Creates and sends the request packet
+        packet = create_packet("data", src=h.id, kval=1, dest=dst, data='Get Pinged!')
+        send_packet(h, packet)
+        send_time = time.time()
+
+        # Waits to receive a reply packet to move onto next ping
+        seq_failed = receive_packet(h, packet)
+        if seq_failed == -1:
+            rtt.append(time.time()-send_time)
+            seq_num += 1
+        else:
+            x -= 1
+            nor += 1
+            print("Retransmitting packet with seq num: ", seq_num)
+    rtt = np.array(rtt)
+    #print(count)
+    print(c, " packets transmitted, ", nor, " packets retransmitted, ", (nor/c)*100, "% packet loss",
+         "\n round-trip min/avg/max/stddev = ", np.min(rtt),"/",np.mean(rtt),"/",np.max(rtt),"/",np.std(rtt), " s" )
+    return 0
 
 
 """ DON'T CHANGE """
