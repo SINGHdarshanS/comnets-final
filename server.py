@@ -1,6 +1,10 @@
 from socket import socket, AF_INET, SOCK_DGRAM
 from packet import *
 
+"""
+    THIS IS A MODIFICATION OF THE CLIENT PYTHON SCRIPT
+"""
+
 #Creates to new server
 class udpserver():
 

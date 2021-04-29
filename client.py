@@ -13,4 +13,4 @@ class udpclient():
 #Initializes a new client and starts the ping
 if __name__ == '__main__':
         udp_client = udpclient(id=101, ip='192.168.1.1', gateway=('192.168.1.2',8881), port=8880)
-        ping(udp_client, c=100, dst=102)
+        # ping(udp_client, c=100, dst=102)

@@ -1,6 +1,7 @@
 import os
 import sys
 
+#dunno what this does really
 def cleanup():
     os.system('sudo mn -c')
     os.system('ps aux | grep "/usr/sbin/sshd -D -o UseDNS=no -u0" > tmp')

@@ -1,10 +1,14 @@
+import signal
+import sys
 from mininet.net import Mininet
 from mininet.log import lg, info
 from mininet.cli import CLI
 from mininet.node import Node
 from mininet.link import TCLink
 from cleanup import cleanup
-class Topo6( Mininet ):
+
+#to be updated when new topo is released
+class Topo( Mininet ):
 
     def __init__(self):
         Mininet.__init__(self, link=TCLink, controller=None, cleanup=True)
@@ -49,7 +53,12 @@ class Topo6( Mininet ):
     def start_network(self):
         CLI( self )
 
+# def sig_handler(sig, frame):
+#     print("Interrupt requested by user. Initiating cleanup.")
+#     cleanup()
+#
+
 if __name__ == '__main__':
-    topo = Topo6()
+    topo = Topo()
     topo.start_network()
     cleanup()
