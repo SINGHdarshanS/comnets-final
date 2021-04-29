@@ -9,19 +9,19 @@ import numpy as np
 
 def create_packet(type, ttl=None, src=None, dest=None, dest2=None, dest3=None, kval=None, data=None):
     if type=="hello":
-        # Type(2), ttl(4), src(4)
+        # type(2), ttl(4), src(4)
         type = 0
         header = struct.pack("HLL", type, ttl, src)
         return header
 
     elif type=="data":
-        # Type(2), src(4), kval(2), dest(4), dest2(4), dest3(4), data(1000)
+        # type(2), src(4), kval(2), dest(4), dest2(4), dest3(4), data(1000)
         type = 1
         header = struct.pack("HLHLLL", type, src, kval, dest, dest2, dest3)
         return header + bytes(data, 'utf-8')
 
     elif type=="ack":
-        # Type(2), src(4), dest(4)
+        # type(2), src(4), dest(4)
         type = 2
         header = struct.pack("HLL", type, src, dest)
         return header
@@ -36,21 +36,21 @@ def create_packet(type, ttl=None, src=None, dest=None, dest2=None, dest3=None, k
 
 
 def read_packet(pkt, ttl=None, src=None, dest=None, dest2=None, dest3=None, kval=None, data=None):
-    type = struct.unpack("H",pkt[0:2])
+    try:
+        type = struct.unpack("H",pkt[0:2])
+    except:
+        type = 9000
+
     if type==0:
         ttl, src = struct.unpack("LL", pkt[2:10])
-        return type, ttl, src
     elif type==1:
         src, kval, dest, dest2, dest3 = struct.unpack("LHLLL", pkt[2:20])
-
-        return type, src, kval, dest, dest2, dest3, pkt[20:]
+        data = pkt[20:]
 
     elif type==2 or type==3:
         src, dest = struct.unpack("LL", pkt[2:10])
-        return type, src, dest, data
-        
-    else:
-        return type, ttl, src, dest, dest2, dest3, kval, data
+
+    return type, ttl, src, dest, dest2, dest3, kval, data
 
 
 ###################################
@@ -64,7 +64,7 @@ def ping(h, c, dst):
     for x in range(c):
         #count += 1
         # Creates and sends the request packet
-        packet = create_packet(1, h.id, dst, seq=seq_num, data='This is assignment 5!')
+        packet = create_packet(1, h.id, dst, seq=seq_num, data='This is NOT assignment 5!')
         send_packet(h, packet)
         send_time = time.time()
 
@@ -83,6 +83,8 @@ def ping(h, c, dst):
          "\n round-trip min/avg/max/stddev = ", np.min(rtt),"/",np.mean(rtt),"/",np.max(rtt),"/",np.std(rtt), " s" )
     return 0
 
+
+""" DON'T CHANGE """
 # Sends a packet across UDP socket the corresponding router gateway for that host
 def send_packet(h, packet):
     s = socket(AF_INET, SOCK_DGRAM)
@@ -90,6 +92,7 @@ def send_packet(h, packet):
     s.close()
     print("Sending: ", packet, " To: ", h.default_gateway)
     return 0
+"""""""""""""""""""""""
 
 # Receives packets across UDP socket
 def receive_packet(h, sent_packet):
@@ -103,24 +106,35 @@ def receive_packet(h, sent_packet):
             if sent_packet != None:
                 s.settimeout(0.007)
             packet,addr = s.recvfrom(1024)
-            pkttype, pktlen, dst, src, seq = read_header(packet)
+            type, ttl, src, dest, dest2, dest3, kval, data = read_packet(packet)
         except OSError:
-            pkttype, pktlen, dst, src, seq = read_header(sent_packet)
-            seq_failed = seq
+            type, ttl, src, dest, dest2, dest3, kval, data = read_packet(sent_packet)
+            seq_failed = type
             break
 
-        if(pkttype == 1 and dst == h.id):
-            print("Received: ", packet, " From: ", src)
+        if (type == 0):
+            pass
+        elif (type == 1 and dest == h.id):
+            # final destinatinon is reached if only
+            if(dest2 is None and dest3 is None):
+                print("Received: ", packet, " From: ", src)
 
-            # Creates reply packet
-            packet = create_packet(2, h.id, src, 0, 'This is a reply!')
-            send_packet(h, packet)
+                # Creates reply packet
+                packet = create_packet(2, h.id, src, 0, 'This is a reply!')
+                send_packet(h, packet)
+            else:
+                #do blcp routing fun stuff here
+                pass
 
         # Checks for reply packet (Note this is not very flexable and would break the server if it receives reply packet)
-        elif(pkttype == 2 and dst == h.id):
+        elif(type == 2 and dst == h.id):
             #data = read_data(packet)
             print("Receved: ", packet, " From: ", src)
             break
+        elif(type == 3):
+            pass
+        else:
+            pass
 
     s.close()
     return  seq_failed
