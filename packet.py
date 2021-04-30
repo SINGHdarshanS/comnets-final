@@ -42,13 +42,19 @@ def read_packet(pkt, ttl=None, src=None, dest=None, dest2=None, dest3=None, kval
         type = 9000
 
     if type==0:
+        type = "hello"
         ttl, src = struct.unpack("LL", pkt[2:10])
     elif type==1:
+        type = "data"
         src, kval, dest, dest2, dest3 = struct.unpack("LHLLL", pkt[2:20])
         data = pkt[20:]
 
     elif type==2 or type==3:
         src, dest = struct.unpack("LL", pkt[2:10])
+        if type == 2:
+            type = "ack"
+        else:
+            type="ls"
 
     return type, ttl, src, dest, dest2, dest3, kval, data
 
@@ -113,7 +119,7 @@ def receive_packet(h, sent_packet):
             seq_failed = type
             break
 
-        if(type == 1 and dest == h.id):
+        if(type == "data" and dest == h.id):
             print("Received: ", data, " From: ", src)
 
             # Creates ack packet
@@ -121,7 +127,7 @@ def receive_packet(h, sent_packet):
             send_packet(h, packet)
 
         # Checks for reply packet (Note this is not very flexable and would break the server if it receives reply packet)
-        elif(type == 2 and dest == h.id):
+        elif(type == "ack" and dest == h.id):
             #data = read_data(packet)
             print("Receved: ", packet, " From: ", src)
             break
