@@ -55,10 +55,20 @@ class udprouter():
                                     thread.start()
                                 else:
                                     # different routes, so must choose the shortest path. request link state packet from both destinations and compare
-                                    if:
-                                        pass
+                                    dist1 = get_dist(dest)
+                                    dist2 = get_dist(dest2)
+                                    if dist1 < dist2:
+                                        server = self.search_dst_addr(dest)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
                                     else:
-                                        pass
+                                        server = self.search_dst_addr(dest2)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest2, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
                             else:
                                 #kval is 2
                                 if self.search_dst_addr(dest) == self.search_dst_addr(dest2):
@@ -75,13 +85,129 @@ class udprouter():
                                         thread.start()
                         else:
                             if kval==1:
-                                pass
+                                if self.search_dst_addr(dest) == self.search_dst_addr(dest2) == self.search_dst_addr(dest3):
+                                    # forward packet to next common location
+                                    server = self.search_dst_addr(dest)
+                                    thread = Thread(target=self.handle_sending(packet,server))
+                                    thread.start()
+                                else:
+                                    # different routes, so must choose the shortest path. request link state packet from both destinations and compare
+                                    dists = [get_dist(dest), get_dist(dest2), get_dist(dest3)]
+                                    dest = index(min(dists))
+                                    if dest==0:
+                                        # send to first dest
+                                        server = self.search_dst_addr(dest)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+                                    elif dest==1:
+                                        # send to dest2
+                                        server = self.search_dst_addr(dest2)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest2, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+                                    else:
+                                        #send to dest3
+                                        server = self.search_dst_addr(dest3)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest3, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+
                             elif kval==2:
-                                pass
+                                if self.search_dst_addr(dest) == self.search_dst_addr(dest2) == self.search_dst_addr(dest3):
+                                    # forward packet to next common location
+                                    server = self.search_dst_addr(dest)
+                                    thread = Thread(target=self.handle_sending(packet,server))
+                                    thread.start()
+                                else:
+                                    if self.search_dst_addr(dest) == self.search_dst_addr(dest2):
+                                        # forward packet to next common location
+                                        server = self.search_dst_addr(dest)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest, dest2=dest2, kval=2, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+                                    elif self.search_dst_addr(dest3) == self.search_dst_addr(dest2):
+                                        # forward packet to next common location
+                                        server = self.search_dst_addr(dest2)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest2, dest2=dest3, kval=2, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+                                    elif self.search_dst_addr(dest) == self.search_dst_addr(dest3):
+                                        # forward packet to next common location
+                                        server = self.search_dst_addr(dest)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest, dest2=dest3, kval=2, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+                                    else:
+                                        # different routes, so must choose the shortest path. request link state packet from both destinations and compare
+                                        pass
                             else:
-                                pass
-                            # 3 potential distinations, do k/n
-                            pass
+                                # 3 potential distinations, do k/n
+                                if self.search_dst_addr(dest) == self.search_dst_addr(dest2) == self.search_dst_addr(dest3):
+                                    # forward packet to next common location
+                                    server = self.search_dst_addr(dest)
+                                    thread = Thread(target=self.handle_sending(packet,server))
+                                    thread.start()
+                                else:
+                                    if self.search_dst_addr(dest) == self.search_dst_addr(dest2):
+                                        # forward packet to next common location
+                                        server = self.search_dst_addr(dest)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest, dest2=dest2, kval=2, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+                                        # send remaining file over k=1 packet
+                                        server = self.search_dst_addr(dest3)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest3, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+
+                                    elif self.search_dst_addr(dest3) == self.search_dst_addr(dest2):
+                                        # forward packet to next common location
+                                        server = self.search_dst_addr(dest2)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest2, dest2=dest3, kval=2, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+                                        # send remaining file over k=1 packet
+                                        server = self.search_dst_addr(dest)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+
+                                    elif self.search_dst_addr(dest) == self.search_dst_addr(dest3):
+                                        # forward packet to next common location
+                                        server = self.search_dst_addr(dest)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest, dest2=dest3, kval=2, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+                                        # send remaining file over k=1 packet
+                                        server = self.search_dst_addr(dest2)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest2, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+
+                                    else:
+                                        # different routes, so send all using k=1 packet
+                                        server = self.search_dst_addr(dest)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+                                        server = self.search_dst_addr(dest2)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest2, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
+
+                                        server = self.search_dst_addr(dest3)
+                                        packet = create_packet(type, ttl=ttl, src=src, dest=dest3, kval=1, data=data)
+                                        thread = Thread(target=self.handle_sending(packet,server))
+                                        thread.start()
 
 
                 s.close()
