@@ -134,3 +134,8 @@ def receive_packet(h, sent_packet):
 
     s.close()
     return  seq_failed
+
+
+def get_dist(dest):
+    #return distance to dest as integer
+    pass
